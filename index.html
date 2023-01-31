@@ -24,13 +24,19 @@
     <p>filamentDiameter</p>
     <p><input type="text" name="filamentDiameter" id="" placeholder="filamentDiameter" value="1.75"></p>
     <p><input type="submit"></p>
+
   </form>
 
   <!-- Output generated GCode -->
-  <input type="text" id="gcodeOutput" placeholder="here comes the output">
+  <p><input type="text" id="gcodeOutput" placeholder="here comes the output"></p>
 
-  <!-- Run the Script -->
+  <!-- Generate a Cube just with Code -->
+  <p><textarea name="cube" id="cube" cols="30" rows="10"></textarea>
+    <button id="generateCube">Generate Cube</button>
+  </p>
+
   <script>
+    // Onclick Submit Button
     document.getElementById("myForm").addEventListener("submit", function (e) {
       e.preventDefault();
       var formData = new FormData(e.target);
@@ -40,6 +46,47 @@
       let gcode = slicer.gcodeExtrusionMove(0, 0, +val.x, +val.y, +val.extrusionWidth);
 
       document.getElementById("gcodeOutput").value = gcode;
+    });
+
+    // Onclick Generate Cube Button
+    document.getElementById("generateCube").addEventListener("click", function (e) {
+      let slicer = new Slicer(0.4, 0.2, 1.75);
+      // setup
+      slicer.movementSpeed = 100;
+      slicer.extrusionSpeed = 30;
+      slicer.heightSpeed = 20;
+
+      // preheat and wait
+      slicer.addLine("G28");
+      slicer.addMove(5, 10);
+      slicer.addBedHeatWait(50);
+      slicer.addToolHeatWait(190);
+
+      // prime and move to start point
+      slicer.addZMove(0.2);
+      slicer.addExtrude(5);
+      slicer.addRetract();
+      slicer.addMove(125, 125);
+      slicer.addUnretract();
+
+      // set absolute, must be provided for extrusion
+      slicer.addLine("G91");
+
+      // generate cubus
+      for (let index = 0; index < 10; index++) {
+        slicer.addExtrusionMove(60, 0);
+        slicer.addExtrusionMove(0, 60);
+        slicer.addExtrusionMove(-60, 0);
+        slicer.addExtrusionMove(0, -60);
+        slicer.addZMove(0.2);
+      }
+
+      // the end
+      slicer.addZMove(20);
+      slicer.disableAll();
+      slicer.addLine("G90");
+
+      document.getElementById("cube").value = slicer.printGcode();
     });
   </script>
 </body>

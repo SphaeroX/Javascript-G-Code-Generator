@@ -4,10 +4,14 @@ class Slicer {
   extrusionWidth = false;
   filamentDiameter = false;
 
+  currentSpeed = false;
+
   gcode = new String();
-  movementSpeed = false;
-  extrusionSpeed = false;
-  heightSpeed = false;
+  movementSpeed = 100;
+  printSpeed = 60;
+  heightSpeed = 20;
+  retractSpeed = 60;
+  retractLength = 2.5;
 
   constructor(nozzleDiameter, layerHeight, filamentDiameter) {
     this.nozzleDiameter = nozzleDiameter;
@@ -32,50 +36,56 @@ class Slicer {
     return `G1 X${x2} Y${y2} E${e.toFixed(5)}`;
   }
 
-  addExtrusionMove(x, y, extrusionWidth = 0.45) {
-    if (this.extrusionSpeed) {
-      this.addSetSpeed(this.extrusionSpeed);
+  addExtrusionMove(x, y, speed = false, extrusionWidth = 0.45) {
+    if (!speed) {
+      speed = this.printSpeed;
     }
 
-    this.gcode += `${this.gcodeExtrusionMove(0, 0, x, y, extrusionWidth)}\n`;
+    this.gcode += `${this.gcodeExtrusionMove(0, 0, x, y, extrusionWidth)} F${speed * 60}\n`;
   }
 
-  addExtrude(length) {
-    if (this.extrusionSpeed) {
-      this.addSetSpeed(this.extrusionSpeed);
+  addExtrude(length, speed = false) {
+    if (!speed) {
+      speed = this.printSpeed;
     }
 
-    this.gcode += `G1 E${length}\n`;
+    this.gcode += `G1 E${length} F${speed * 60}\n`;
   }
 
-  addZMove(z) {
+  addZMove(z, speed = false) {
+    if (!speed) {
+      speed = this.heightSpeed;
+    }
+
     this.layerHeight = z;
 
-    if (this.heightSpeed) {
-      this.addSetSpeed(this.heightSpeed);
-    }
-
-    this.gcode += `G1 Z${z}\n`;
+    this.gcode += `G1 Z${z} F${speed * 60}\n`;
   }
 
-  addMove(x, y) {
-    if (this.movementSpeed) {
-      this.addSetSpeed(this.movementSpeed);
+  addMove(x, y, speed = false) {
+    if (!speed) {
+      speed = this.movementSpeed;
     }
 
-    this.gcode += `G1 X${x} Y${y}\n`;
+    this.gcode += `G1 X${x} Y${y} F${speed * 60}\n`;
   }
 
   addLine(str) {
     this.gcode += `${str}\n`;
   }
 
-  addRetract(length = 2) {
-    this.gcode += `G1 E${Math.abs(length)}\n`;
+  addRetract(length = false) {
+    if (!length) {
+      length = this.retractLength;
+    }
+    this.gcode += `G1 E${Math.abs(length)} F${this.retractSpeed * 60}\n`;
   }
 
-  addUnretract(length = 2) {
-    this.gcode += `G1 E${length}\n`;
+  addUnretract(length = false) {
+    if (!length) {
+      length = this.retractLength;
+    }
+    this.gcode += `G1 E${length} F${this.retractSpeed * 60}\n`;
   }
 
   addBedHeat(temp) {
@@ -99,42 +109,11 @@ class Slicer {
     this.gcode += `G1 F${speed * 60}\n`;
   }
 
+  disableAll() {
+    this.gcode += `M106 S0\nM104 S0\nM140 S0\nM84\n`;
+  }
+
   printGcode() {
     return this.gcode;
   }
 }
-
-let slicer = new Slicer(0.4, 0.2, 1.75);
-// setup
-slicer.movementSpeed = 100;
-slicer.extrusionSpeed = 30;
-slicer.heightSpeed = 20;
-
-// preheat and wait
-slicer.addLine("G28");
-slicer.addMove(5, 10);
-slicer.addBedHeatWait(50);
-slicer.addToolHeatWait(190);
-
-// prime and move to start point
-slicer.addZMove(0.2);
-slicer.addExtrude(5);
-slicer.addMove(125, 125);
-
-// set absolute, must be provided for extrusion
-slicer.addLine("G91");
-
-// generate cubus
-for (let index = 0; index < 10; index++) {
-  slicer.addExtrusionMove(60, 0);
-  slicer.addExtrusionMove(0, 60);
-  slicer.addExtrusionMove(-60, 0);
-  slicer.addExtrusionMove(0, -60);
-  slicer.addZMove(0.2);
-}
-
-// the end
-slicer.addZMove(20);
-slicer.addLine("G90");
-
-console.log(slicer.printGcode());
