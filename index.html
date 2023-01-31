@@ -37,9 +37,9 @@
       var val = Object.fromEntries(formData);
 
       let slicer = new Slicer(+val.nozzleDiameter, +val.layerHeight, +val.filamentDiameter);
-      var gocde = slicer.gcodeExtrusionMove(+val.x, +val.y, +val.extrusionWidth);
+      let gcode = slicer.gcodeExtrusionMove(0, 0, +val.x, +val.y, +val.extrusionWidth);
 
-      document.getElementById("gcodeOutput").value = gocde;
+      document.getElementById("gcodeOutput").value = gcode;
     });
   </script>
 </body>
