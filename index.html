@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="slicer.class.js"></script>
+</head>
+
+<body>
+  <form id="myForm">
+    <p>X</p>
+    <p><input type="text" name="x" id="" placeholder="X" value="10"></p>
+    <p>Y</p>
+    <p><input type="text" name="y" id="" placeholder="Y" value="0"></p>
+    <p>nozzleDiameter</p>
+    <p><input type="text" name="nozzleDiameter" id="" placeholder="nozzleDiameter" value="0.4"></p>
+    <p>layerHeight</p>
+    <p><input type="text" name="layerHeight" id="" placeholder="layerHeight" value="0.2"></p>
+    <p>extrusionWidth</p>
+    <p><input type="text" name="extrusionWidth" id="" placeholder="extrusionWidth" value="0.45"></p>
+    <p>filamentDiameter</p>
+    <p><input type="text" name="filamentDiameter" id="" placeholder="filamentDiameter" value="1.75"></p>
+    <p><input type="submit"></p>
+  </form>
+
+  <!-- Output generated GCode -->
+  <input type="text" id="gcodeOutput" placeholder="here comes the output">
+
+  <!-- Run the Script -->
+  <script>
+    document.getElementById("myForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var formData = new FormData(e.target);
+      var val = Object.fromEntries(formData);
+
+      let slicer = new Slicer(+val.nozzleDiameter, +val.layerHeight, +val.filamentDiameter);
+      var gocde = slicer.gcodeExtrusionMove(+val.x, +val.y, +val.extrusionWidth);
+
+      document.getElementById("gcodeOutput").value = gocde;
+    });
+  </script>
+</body>
+
+</html>
