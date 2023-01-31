@@ -52,12 +52,10 @@ class Slicer {
     this.gcode += `G1 E${length} F${speed * 60}\n`;
   }
 
-  addZMove(z, speed = false) {
+  addZMove(z = this.layerHeight, speed = false) {
     if (!speed) {
       speed = this.heightSpeed;
     }
-
-    this.layerHeight = z;
 
     this.gcode += `G1 Z${z} F${speed * 60}\n`;
   }
@@ -78,7 +76,7 @@ class Slicer {
     if (!length) {
       length = this.retractLength;
     }
-    this.gcode += `G1 E${Math.abs(length)} F${this.retractSpeed * 60}\n`;
+    this.gcode += `G1 E-${length} F${this.retractSpeed * 60}\n`;
   }
 
   addUnretract(length = false) {
