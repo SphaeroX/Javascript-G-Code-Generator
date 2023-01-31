@@ -7,3 +7,10 @@ Javascript class for Generate G code including extrusion calculation
 let slicer = new Slicer(nozzleDiameter, layerHeight, filamentDiameter);
 let gcode = slicer.gcodeExtrusionMove(x, y, extrusionWidth));
 ```
+
+
+## Features
+
+- gcodeExtrusionMove(x, y, extrusionWidth)
+
+
