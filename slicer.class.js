@@ -11,13 +11,7 @@ class Slicer {
   }
 
   calculateFilamentLength(distance, extrusionWidth) {
-    const A = (extrusionWidth - this.layerHeight) * this.layerHeight + Math.PI * (this.layerHeight / 2) ** 2;
-
-    const V = A * distance;
-    const vh = this.filamentDiameter / A;
-
-    const AFilament = Math.PI * (this.filamentDiameter / 2) ** 2;
-
+    const A = ((extrusionWidth - this.layerHeight) * this.layerHeight) + (Math.PI * (this.layerHeight / 2) ** 2);
     const E = (A * distance * 4) / (Math.PI * this.filamentDiameter ** 2);
 
     return E;
