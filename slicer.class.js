@@ -44,14 +44,34 @@ class Slicer {
     this.currentPosition.y += y;
   }
 
+  extrusionMoveTo(x, y, speed = this.printSpeed) {
+    const distanceX = x - this.currentPosition.x;
+    const distanceY = y - this.currentPosition.y;
+                                  
+    const gcode = this.generateExtrusionGcode(0, 0, distanceX, distanceY);
+    this.addGcodeLine(gcode, speed);
+    this.currentPosition.x += distanceX;
+    this.currentPosition.y += distanceY;
+  }
+
   extrude(length, speed = this.printSpeed) {
     this.addGcodeLine(`G1 E${length}`, speed);
     this.currentPosition.e += length;
   }
 
-  moveZ(z = this.layerHeight, speed = this.heightSpeed) {
+  moveZ(z = this.layerHeight, retract = false, speed = this.heightSpeed) {
+    if (retract) {
+      this.retract();
+    }
+
     this.addGcodeLine(`G1 Z${z}`, speed);
+    
+    if (retract) {
+      this.unretract();
+    }
+    
     this.currentPosition.z += z;
+    this.currentPosition.z = parseFloat(this.currentPosition.z.toFixed(this.eRoundFactor))
   }
 
   move(x, y, z, speed = this.movementSpeed) {
@@ -66,13 +86,29 @@ class Slicer {
     this.currentPosition.y += y;
   }
 
-  retract(length = this.retractLength) {
-    this.addGcodeLine(`G1 E-${length}`, this.retractSpeed);
+  moveTo(x, y, z, speed = this.movementSpeed) {
+    const distanceX = x - this.currentPosition.x;
+    const distanceY = y - this.currentPosition.y;
+    
+    if (z) {
+      const distanceZ = z - this.currentPosition.z;
+      this.addGcodeLine(`G1 X${distanceX} Y${distanceY} Z${distanceZ}`, speed);
+      this.currentPosition.z += distanceZ;
+    } else {
+      this.addGcodeLine(`G1 X${distanceX} Y${distanceY}`, speed);
+    }
+    
+    this.currentPosition.x += distanceX;
+    this.currentPosition.y += distanceY;
+  }
+
+  retract(e = this.retractLength) {
+    this.addGcodeLine(`G1 E-${e}`, this.retractSpeed);
     this.currentPosition.e -= e;
   }
 
-  unretract(length = this.retractLength) {
-    this.addGcodeLine(`G1 E${length}`, this.retractSpeed);
+  unretract(e = this.retractLength) {
+    this.addGcodeLine(`G1 E${e}`, this.retractSpeed);
     this.currentPosition.e += e;
   }
 
@@ -101,7 +137,7 @@ class Slicer {
   }
 
   home() {
-    this.gcode += `G28\nG1 X0 Y0 Z10\n`;
+    this.gcode += `G90\nG28\nG1 X0 Y0 Z10\nG91;`;
     this.currentPosition = {x:0, y:0, z:10, e:0};
   }
 
@@ -116,19 +152,23 @@ const slicer = new Slicer(0.4, 0.2, 1.75);
 
 slicer.home();
 
-
 slicer.toolHeat(180);
 slicer.bedHeatWait(50);
 slicer.toolHeatWait(180);
 
-slicer.move(100, 100, -9.8);
+slicer.move(90, 110, -9.8);
+
+slicer.extrusionMoveTo(100, 100);
 
 slicer.extrusionMove(20, 0);
 slicer.extrusionMove(0, -20);
 slicer.extrusionMove(-20, 0);
 slicer.extrusionMove(0, 20);
 
+slicer.moveZ(0.2, true);
+
 slicer.move(-100, -100, 10);
+
 slicer.disableAll();
 
 // Show Code and Pos.
