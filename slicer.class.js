@@ -156,7 +156,7 @@ slicer.toolHeat(180);
 slicer.bedHeatWait(50);
 slicer.toolHeatWait(180);
 
-slicer.move(90, 110, -9.8);
+slicer.moveTo(90, 110, slicer.layerHeight);
 
 slicer.extrusionMoveTo(100, 100);
 
