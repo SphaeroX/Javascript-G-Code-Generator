@@ -137,7 +137,7 @@ class Slicer {
   }
 
   home() {
-    this.gcode += `G90\nG28\nG1 X0 Y0 Z10\nG91;`;
+    this.gcode += `G90\nG28\nG1 X0 Y0 Z10\nG91\n`;
     this.currentPosition = {x:0, y:0, z:10, e:0};
   }
 
