@@ -1,28 +1,20 @@
 class Slicer {
-  nozzleDiameter = false;
-  layerHeight = false;
-  extrusionWidth = false;
-  filamentDiameter = false;
-
-  currentSpeed = false;
-
-  gcode = new String();
-  movementSpeed = 100;
-  printSpeed = 60;
-  heightSpeed = 20;
-  retractSpeed = 60;
-  retractLength = 2.5;
-
-  constructor(nozzleDiameter, layerHeight, filamentDiameter) {
+  constructor(nozzleDiameter, layerHeight, filamentDiameter, movementSpeed = 100, printSpeed = 60, heightSpeed = 20, retractSpeed = 60, retractLength = 2.5) {
     this.nozzleDiameter = nozzleDiameter;
     this.layerHeight = layerHeight;
     this.filamentDiameter = filamentDiameter;
+    this.movementSpeed = movementSpeed;
+    this.printSpeed = printSpeed;
+    this.heightSpeed = heightSpeed;
+    this.retractSpeed = retractSpeed;
+    this.retractLength = retractLength;
+    this.extrusionWidth = layerHeight * 1.2;
+    this.gcode = '';
   }
 
-  calculateFilamentLength(distance, extrusionWidth) {
-    const A = (extrusionWidth - this.layerHeight) * this.layerHeight + Math.PI * (this.layerHeight / 2) ** 2;
+  calculateFilamentLength(distance) {
+    const A = (this.extrusionWidth - this.layerHeight) * this.layerHeight + Math.PI * (this.layerHeight / 2) ** 2;
     const E = (A * distance * 4) / (Math.PI * this.filamentDiameter ** 2);
-
     return E;
   }
 
@@ -30,80 +22,58 @@ class Slicer {
     return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
   }
 
-  gcodeExtrusionMove(x1, y1, x2, y2, extrusionWidth) {
-    var distance = this.calculateDistance(x1, y1, x2, y2);
-    var e = this.calculateFilamentLength(distance, extrusionWidth);
+  generateExtrusionGcode(x1, y1, x2, y2) {
+    const distance = this.calculateDistance(x1, y1, x2, y2);
+    const e = this.calculateFilamentLength(distance);
     return `G1 X${x2} Y${y2} E${e.toFixed(5)}`;
   }
 
-  addExtrusionMove(x, y, speed = false, extrusionWidth = 0.45) {
-    if (!speed) {
-      speed = this.printSpeed;
-    }
-
-    this.gcode += `${this.gcodeExtrusionMove(0, 0, x, y, extrusionWidth)} F${speed * 60}\n`;
+  addGcodeLine(gcode, speed) {
+    this.gcode += `${gcode} F${speed * 60}\n`;
   }
 
-  addExtrude(length, speed = false) {
-    if (!speed) {
-      speed = this.printSpeed;
-    }
-
-    this.gcode += `G1 E${length} F${speed * 60}\n`;
+  extrudeMove(x, y, speed = this.printSpeed) {
+    const gcode = this.generateExtrusionGcode(0, 0, x, y);
+    this.addGcodeLine(gcode, speed);
   }
 
-  addZMove(z = this.layerHeight, speed = false) {
-    if (!speed) {
-      speed = this.heightSpeed;
-    }
-
-    this.gcode += `G1 Z${z} F${speed * 60}\n`;
+  extrude(length, speed = this.printSpeed) {
+    this.addGcodeLine(`G1 E${length}`, speed);
   }
 
-  addMove(x, y, speed = false) {
-    if (!speed) {
-      speed = this.movementSpeed;
-    }
-
-    this.gcode += `G1 X${x} Y${y} F${speed * 60}\n`;
+  zMove(z = this.layerHeight, speed = this.heightSpeed) {
+    this.addGcodeLine(`G1 Z${z}`, speed);
   }
 
-  addLine(str) {
-    this.gcode += `${str}\n`;
+  move(x, y, speed = this.movementSpeed) {
+    this.addGcodeLine(`G1 X${x} Y${y}`, speed);
   }
 
-  addRetract(length = false) {
-    if (!length) {
-      length = this.retractLength;
-    }
-    this.gcode += `G1 E-${length} F${this.retractSpeed * 60}\n`;
+  retract(length = this.retractLength) {
+    this.addGcodeLine(`G1 E-${length}`, this.retractSpeed);
   }
 
-  addUnretract(length = false) {
-    if (!length) {
-      length = this.retractLength;
-    }
-    this.gcode += `G1 E${length} F${this.retractSpeed * 60}\n`;
+  unretract(length = this.retractLength) {
+    this.addGcodeLine(`G1 E${length}`, this.retractSpeed);
   }
 
-  addBedHeat(temp) {
+  bedHeat(temp) {
     this.gcode += `M190 S${temp}\n`;
   }
 
-  addBedHeatWait(temp) {
+  bedHeatWait(temp) {
     this.gcode += `M140 S${temp}\n`;
   }
 
-  addToolHeat(temp) {
+  toolHeat(temp) {
     this.gcode += `M104 S${temp}\n`;
   }
 
-  addToolHeatWait(temp) {
+  toolHeatWait(temp) {
     this.gcode += `M109 S${temp}\n`;
   }
 
-  // input mm/s
-  addSetSpeed(speed) {
+  setSpeed(speed) {
     this.gcode += `G1 F${speed * 60}\n`;
   }
 
@@ -111,7 +81,8 @@ class Slicer {
     this.gcode += `M106 S0\nM104 S0\nM140 S0\nM84\n`;
   }
 
-  printGcode() {
+  getGcode() {
     return this.gcode;
   }
 }
+
