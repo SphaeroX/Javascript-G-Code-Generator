@@ -141,6 +141,38 @@ class Slicer {
     this.currentPosition = {x:0, y:0, z:10, e:0};
   }
 
+printRectangle(x, y, startDirection = "right", isClockwise = true) {
+    const dirMap = {
+        "right": {
+            cw: [this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, -y)],
+            ccw: [this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, y)]
+        },
+        "up": {
+            cw: [this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, x, 0)],
+            ccw: [this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, -x, 0)],
+        },
+        "left": {
+            cw: [this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, y)],
+            ccw: [this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, -y)],
+        },
+        "down": {
+            cw: [this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, -x, 0)],
+            ccw: [this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, x, 0)],
+        }
+    };
+    
+    if (!dirMap.hasOwnProperty(startDirection)) {
+        console.error("Invalid start direction");
+        return;
+    }
+    
+    const moves = isClockwise ? dirMap[startDirection].cw : dirMap[startDirection].ccw;
+    
+    for (let move of moves) {
+        move();
+    }
+  }
+  
   getGcode() {
     return this.gcode;
   }
@@ -158,12 +190,16 @@ slicer.toolHeatWait(180);
 
 slicer.moveTo(90, 110, slicer.layerHeight);
 
+
 slicer.extrusionMoveTo(100, 100);
 
 slicer.extrusionMove(20, 0);
 slicer.extrusionMove(0, -20);
 slicer.extrusionMove(-20, 0);
 slicer.extrusionMove(0, 20);
+
+slicer.moveTo(10, 10);
+slicer.printRectangle(10,10, "left", false);
 
 slicer.moveZ(0.2, true);
 
