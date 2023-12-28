@@ -172,6 +172,27 @@ printRectangle(x, y, startDirection = "right", isClockwise = true) {
         move();
     }
   }
+    printFilledRectangle(width, height, fillDensity = 1) {
+    const lineSpacing = this.extrusionWidth * fillDensity;
+    let currentY = 0;
+
+    this.extrusionMoveTo(0, 0);
+
+    while (currentY < height) {
+      this.extrusionMove(width, 0);
+      currentY += lineSpacing;
+
+      if (currentY < height) {
+        this.extrusionMoveTo(0, currentY);
+        this.extrusionMove(-width, 0);
+        currentY += lineSpacing;
+      }
+
+      if (currentY < height) {
+        this.extrusionMoveTo(0, currentY);
+      }
+    }
+  }
   
   getGcode() {
     return this.gcode;
@@ -190,6 +211,9 @@ slicer.toolHeatWait(180);
 
 slicer.moveTo(90, 110, slicer.layerHeight);
 
+slicer.printFilledRectangle(50, 50);
+
+slicer.moveZ();
 
 slicer.extrusionMoveTo(100, 100);
 
@@ -199,14 +223,18 @@ slicer.extrusionMove(-20, 0);
 slicer.extrusionMove(0, 20);
 
 slicer.moveTo(10, 10);
-slicer.printRectangle(10,10, "left", false);
+slicer.printRectangle(10, 10, "left", false);
 
-slicer.moveZ(0.2, true);
+slicer.moveZ(10, true);
 
 slicer.move(-100, -100, 10);
 
 slicer.disableAll();
 
-// Show Code and Pos.
-console.log(slicer.getGcode());
+// Save Code
+const fs = require("fs");
+const gcode = slicer.getGcode();
+fs.writeFileSync("output.gcode", gcode);
+
+// Show current Position
 console.log(slicer.currentPosition);
