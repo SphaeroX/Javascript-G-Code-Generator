@@ -1,4 +1,3 @@
-
 # Slicer JavaScript Class
 
 The `Slicer` class is designed to generate G-code instructions for 3D printing tasks. It provides methods to control movements and extrusion for your printer.
@@ -46,28 +45,9 @@ const slicer = new Slicer(nozzleDiameter, layerHeight, filamentDiameter, movemen
 - `disableAll()`: Disable all components.
 - `home()`: Home the printer.
 - `getGcode()`: Get the accumulated G-code instructions.
+- `printRectangle(x, y, startDirection, isClockwise)`: Prints a Rectangle
+- `printRectanglefilled(x, y, fillDensity)`: Prints a filled Rectangle
 
 ## Example Usage
 
-```javascript
-const slicer = new Slicer(0.4, 0.2, 1.75);
-
-slicer.home();
-
-slicer.toolHeat(180);
-slicer.bedHeatWait(50);
-slicer.toolHeatWait(180);
-
-slicer.moveTo(90, 110, slicer.layerHeight);
-
-// ... more method calls ...
-
-slicer.disableAll();
-
-// Display G-code and current position
-console.log(slicer.getGcode());
-console.log(slicer.currentPosition);
-```
-
-For more details about the methods and their parameters, please refer to the class implementation.
-```
+run the slicer.class.js, above the class is an example

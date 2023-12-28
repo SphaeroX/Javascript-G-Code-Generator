@@ -172,24 +172,25 @@ class Slicer {
       move();
     }
   }
-  printFilledRectangle(width, height, fillDensity = 1) {
+
+  printFilledRectangle(x, y, fillDensity = 1) {
     const lineSpacing = this.extrusionWidth * fillDensity;
-    let currentY = 0;
+    let relativePostion = { x: 0, y: 0 };
 
-    this.extrusionMoveTo(0, 0);
-
-    while (currentY < height) {
-      this.extrusionMove(width, 0);
-      currentY += lineSpacing;
-
-      if (currentY < height) {
-        this.extrusionMoveTo(0, currentY);
-        this.extrusionMove(-width, 0);
-        currentY += lineSpacing;
+    while (relativePostion.y < y) {
+      if (relativePostion.x === 0) {
+        this.extrusionMove(x, 0);
+        relativePostion.x = x;
+      } else {
+        this.extrusionMove(-x, 0);
+        relativePostion.x = 0;
       }
 
-      if (currentY < height) {
-        this.extrusionMoveTo(0, currentY);
+      if (relativePostion.y + lineSpacing <= y) {
+        this.extrusionMove(0, lineSpacing);
+        relativePostion.y += lineSpacing;
+      } else {
+        break;
       }
     }
   }
@@ -207,12 +208,9 @@ slicer.home();
 slicer.toolHeat(180);
 slicer.bedHeatWait(50);
 slicer.toolHeatWait(180);
+slicer.moveTo(0, 0, slicer.layerHeight);
 
-slicer.moveTo(90, 110, slicer.layerHeight);
-
-slicer.printFilledRectangle(50, 50);
-
-slicer.moveZ();
+slicer.printFilledRectangle(50, 50, 1);
 
 slicer.extrusionMoveTo(100, 100);
 
@@ -220,6 +218,8 @@ slicer.extrusionMove(20, 0);
 slicer.extrusionMove(0, -20);
 slicer.extrusionMove(-20, 0);
 slicer.extrusionMove(0, 20);
+
+slicer.moveZ();
 
 slicer.moveTo(10, 10);
 slicer.printRectangle(10, 10, "left", false);
