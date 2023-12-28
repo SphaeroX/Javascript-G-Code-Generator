@@ -9,9 +9,9 @@ class Slicer {
     this.retractSpeed = retractSpeed;
     this.retractLength = retractLength;
     this.extrusionWidth = layerHeight * 1.2;
-    this.currentPosition = {x: null, y: null, z:null, e: null};
+    this.currentPosition = { x: null, y: null, z: null, e: null };
     this.eRoundFactor = 5;
-    this.gcode = '';
+    this.gcode = "";
   }
 
   calculateFilamentLength(distance) {
@@ -23,13 +23,13 @@ class Slicer {
   calculateDistance(x1, y1, x2, y2) {
     return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
   }
-  
+
   generateExtrusionGcode(x1, y1, x2, y2) {
     const distance = this.calculateDistance(x1, y1, x2, y2);
     const e = this.calculateFilamentLength(distance);
     const eRounded = parseFloat(e.toFixed(this.eRoundFactor));
     this.currentPosition.e += eRounded;
-    this.currentPosition.e = parseFloat(this.currentPosition.e.toFixed(this.eRoundFactor))
+    this.currentPosition.e = parseFloat(this.currentPosition.e.toFixed(this.eRoundFactor));
     return `G1 X${x2} Y${y2} E${eRounded}`;
   }
 
@@ -47,7 +47,7 @@ class Slicer {
   extrusionMoveTo(x, y, speed = this.printSpeed) {
     const distanceX = x - this.currentPosition.x;
     const distanceY = y - this.currentPosition.y;
-                                  
+
     const gcode = this.generateExtrusionGcode(0, 0, distanceX, distanceY);
     this.addGcodeLine(gcode, speed);
     this.currentPosition.x += distanceX;
@@ -65,13 +65,13 @@ class Slicer {
     }
 
     this.addGcodeLine(`G1 Z${z}`, speed);
-    
+
     if (retract) {
       this.unretract();
     }
-    
+
     this.currentPosition.z += z;
-    this.currentPosition.z = parseFloat(this.currentPosition.z.toFixed(this.eRoundFactor))
+    this.currentPosition.z = parseFloat(this.currentPosition.z.toFixed(this.eRoundFactor));
   }
 
   move(x, y, z, speed = this.movementSpeed) {
@@ -81,7 +81,7 @@ class Slicer {
     } else {
       this.addGcodeLine(`G1 X${x} Y${y}`, speed);
     }
-    
+
     this.currentPosition.x += x;
     this.currentPosition.y += y;
   }
@@ -89,7 +89,7 @@ class Slicer {
   moveTo(x, y, z, speed = this.movementSpeed) {
     const distanceX = x - this.currentPosition.x;
     const distanceY = y - this.currentPosition.y;
-    
+
     if (z) {
       const distanceZ = z - this.currentPosition.z;
       this.addGcodeLine(`G1 X${distanceX} Y${distanceY} Z${distanceZ}`, speed);
@@ -97,7 +97,7 @@ class Slicer {
     } else {
       this.addGcodeLine(`G1 X${distanceX} Y${distanceY}`, speed);
     }
-    
+
     this.currentPosition.x += distanceX;
     this.currentPosition.y += distanceY;
   }
@@ -138,41 +138,41 @@ class Slicer {
 
   home() {
     this.gcode += `G90\nG28\nG1 X0 Y0 Z10\nG91\n`;
-    this.currentPosition = {x:0, y:0, z:10, e:0};
+    this.currentPosition = { x: 0, y: 0, z: 10, e: 0 };
   }
 
-printRectangle(x, y, startDirection = "right", isClockwise = true) {
+  printRectangle(x, y, startDirection = "right", isClockwise = true) {
     const dirMap = {
-        "right": {
-            cw: [this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, -y)],
-            ccw: [this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, y)]
-        },
-        "up": {
-            cw: [this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, x, 0)],
-            ccw: [this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, -x, 0)],
-        },
-        "left": {
-            cw: [this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, y)],
-            ccw: [this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, -y)],
-        },
-        "down": {
-            cw: [this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, -x, 0)],
-            ccw: [this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, x, 0)],
-        }
+      right: {
+        cw: [this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, -y)],
+        ccw: [this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, y)],
+      },
+      up: {
+        cw: [this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, x, 0)],
+        ccw: [this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, -x, 0)],
+      },
+      left: {
+        cw: [this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, y)],
+        ccw: [this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, -y)],
+      },
+      down: {
+        cw: [this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, x, 0), this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, -x, 0)],
+        ccw: [this.extrusionMove.bind(this, 0, -y), this.extrusionMove.bind(this, -x, 0), this.extrusionMove.bind(this, 0, y), this.extrusionMove.bind(this, x, 0)],
+      },
     };
-    
+
     if (!dirMap.hasOwnProperty(startDirection)) {
-        console.error("Invalid start direction");
-        return;
+      console.error("Invalid start direction");
+      return;
     }
-    
+
     const moves = isClockwise ? dirMap[startDirection].cw : dirMap[startDirection].ccw;
-    
+
     for (let move of moves) {
-        move();
+      move();
     }
   }
-    printFilledRectangle(width, height, fillDensity = 1) {
+  printFilledRectangle(width, height, fillDensity = 1) {
     const lineSpacing = this.extrusionWidth * fillDensity;
     let currentY = 0;
 
@@ -193,12 +193,11 @@ printRectangle(x, y, startDirection = "right", isClockwise = true) {
       }
     }
   }
-  
+
   getGcode() {
     return this.gcode;
   }
 }
-
 
 // Example
 const slicer = new Slicer(0.4, 0.2, 1.75);
